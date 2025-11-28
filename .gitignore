@@ -20,3 +20,9 @@ GTAGS
 *.swp
 *.patch
 *.gcov
+
+# Debian crap
+b
+debian/qemu-*
+debian/.debhelper/
+debian/files
