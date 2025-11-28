@@ -12,6 +12,7 @@
  * See the COPYING file in the top-level directory.
  *
  */
+#include <x86intrin.h>
 
 #include "qemu/osdep.h"
 #include <sys/ioctl.h>
@@ -3244,7 +3245,8 @@ int kvm_cpu_exec(CPUState *cpu)
             }
         }
 
-        trace_kvm_run_exit(cpu->cpu_index, run->exit_reason);
+        long long ts = __rdtsc();
+        trace_kvm_run_exit(cpu->cpu_index, ts, run->exit_reason);
         switch (run->exit_reason) {
         case KVM_EXIT_IO:
             /* Called outside BQL */
@@ -3403,7 +3405,9 @@ int kvm_vcpu_ioctl(CPUState *cpu, unsigned long type, ...)
     arg = va_arg(ap, void *);
     va_end(ap);
 
-    trace_kvm_vcpu_ioctl(cpu->cpu_index, type, arg);
+    // Modifications: Adding time stamp field
+    long long ts = __rdtsc();
+    trace_kvm_vcpu_ioctl(cpu->cpu_index, ts, type, arg);
     accel_cpu_ioctl_begin(cpu);
     ret = ioctl(cpu->kvm_fd, type, arg);
     accel_cpu_ioctl_end(cpu);
